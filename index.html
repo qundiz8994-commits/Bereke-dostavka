@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Lazzatli</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg: #121212;
+    --card: #1c1c1c;
+    --accent: #ff5a1f;
+    --accent-2: #6fbf3c;
+    --text: #f4f4f4;
+    --muted: #9a9a9a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text); padding-bottom:90px;
+  }
+  header{
+    position:sticky; top:0; z-index:10; background:var(--bg);
+    padding:12px 14px 6px; border-bottom:1px solid #262626;
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:20px; margin-bottom:10px;}
+  .brand .logo{
+    background:var(--accent); color:#fff; padding:4px 10px; border-radius:14px; font-size:16px;
+  }
+  .tabs{display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto; padding:9px 16px; border-radius:20px; background:#262626; color:var(--muted);
+    font-size:14px; font-weight:600; white-space:nowrap; cursor:pointer; border:none;
+  }
+  .tab.active{background:var(--accent); color:#fff;}
+
+  .promo{
+    margin:12px 14px 4px; padding:18px; border-radius:18px;
+    background:linear-gradient(135deg,#ff7a3d,#ff4d1f); text-align:center; font-weight:800; font-size:18px;
+  }
+
+  main{padding:6px 14px 14px;}
+  h2.section{font-size:20px; margin:18px 2px 10px;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .item{
+    background:var(--card); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;
+  }
+  .item img{width:100%; aspect-ratio:1/1; object-fit:cover; background:#333;}
+  .item .info{padding:10px 10px 12px; display:flex; flex-direction:column; gap:8px; flex:1;}
+  .item .name{font-size:14px; font-weight:700; line-height:1.25; min-height:36px;}
+  .item .desc{font-size:11.5px; color:var(--muted);}
+  .row-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:auto;}
+  .price{font-weight:800; font-size:15px;}
+  .old-price{font-size:12px; color:var(--muted); text-decoration:line-through; margin-right:4px;}
+  .add-btn{
+    background:var(--accent); color:#fff; border:none; width:32px; height:32px; border-radius:50%;
+    font-size:18px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .stepper{display:flex; align-items:center; gap:8px; background:var(--accent); border-radius:20px; padding:4px 8px;}
+  .stepper button{background:none; border:none; color:#fff; font-size:16px; font-weight:800; width:22px; cursor:pointer;}
+  .stepper span{color:#fff; font-weight:700; min-width:14px; text-align:center;}
+
+  .cart-bar{
+    position:fixed; left:14px; right:14px; bottom:14px; background:var(--accent);
+    border-radius:18px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 6px 20px rgba(0,0,0,.4); cursor:pointer; font-weight:800;
+  }
+  .hidden{display:none !important;}
+
+  /* Cart drawer */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:20;
+  }
+  .drawer{
+    position:fixed; left:0; right:0; bottom:0; z-index:21; background:var(--bg);
+    border-radius:20px 20px 0 0; max-height:85vh; display:flex; flex-direction:column;
+  }
+  .drawer-head{display:flex; justify-content:space-between; align-items:center; padding:16px;}
+  .drawer-head h3{margin:0; font-size:20px;}
+  .drawer-head .close{font-size:22px; color:var(--muted); cursor:pointer;}
+  .cart-list{overflow-y:auto; padding:0 16px; flex:1;}
+  .cart-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #232323;}
+  .cart-row img{width:52px; height:52px; border-radius:10px; object-fit:cover; background:#333;}
+  .cart-row .meta{flex:1;}
+  .cart-row .meta .n{font-weight:700; font-size:14px;}
+  .cart-row .meta .p{font-size:12.5px; color:var(--muted);}
+  .summary{padding:12px 16px 4px; border-top:1px solid #232323;}
+  .summary .line{display:flex; justify-content:space-between; padding:5px 0; font-size:14px; color:var(--muted);}
+  .summary .total{display:flex; justify-content:space-between; padding:10px 0 4px; font-size:19px; font-weight:800; color:var(--text);}
+  .free-note{background:#1e2f18; color:var(--accent-2); padding:8px 12px; border-radius:10px; font-size:12.5px; margin:6px 0;}
+  .checkout-btn{
+    margin:12px 16px 18px; background:var(--accent); color:#fff; border:none; border-radius:16px;
+    padding:16px; font-size:16px; font-weight:800; cursor:pointer;
+  }
+  .empty{padding:30px 16px; text-align:center; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="logo">lazzatli</span> Lazzatli</div>
+  <div class="tabs" id="tabs"></div>
+</header>
+
+<div class="promo">Onam tayyorlagandek mazali taomlar 😋</div>
+
+<main id="main"></main>
+
+<div class="cart-bar hidden" id="cartBar">
+  <span id="cartCount">0 ta mahsulot</span>
+  <span id="cartTotal">0 so'm</span>
+</div>
+
+<div id="drawerRoot"></div>
+
+<script>
+let MENU = {};
+let DELIVERY_FEE = 15000;
+let FREE_DELIVERY_THRESHOLD = 200000;
+
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) { tg.expand(); tg.ready(); }
+
+let cart = {}; // id -> {name, price, qty, image}
+let activeCat = null;
+
+function fmt(n){ return n.toLocaleString('ru-RU').replace(/,/g,' '); }
+
+function renderTabs(){
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  Object.keys(MENU).forEach(catKey=>{
+    const b = document.createElement('button');
+    b.className = 'tab' + (catKey===activeCat ? ' active':'');
+    b.textContent = MENU[catKey].name_uz;
+    b.onclick = ()=>{ activeCat = catKey; renderTabs(); renderItems(); };
+    tabs.appendChild(b);
+  });
+}
+
+function renderItems(){
+  const main = document.getElementById('main');
+  const cat = MENU[activeCat];
+  main.innerHTML = `<h2 class="section">${cat.name_uz} <span style="color:var(--muted); font-size:14px;">${cat.items.length} dona</span></h2><div class="grid" id="grid"></div>`;
+  const grid = document.getElementById('grid');
+  cat.items.forEach(it=>{
+    const qty = cart[it.id] ? cart[it.id].qty : 0;
+    const card = document.createElement('div');
+    card.className = 'item';
+    card.innerHTML = `
+      <img src="${it.image}" alt="">
+      <div class="info">
+        <div class="name">${it.name_uz}</div>
+        ${it.description_uz ? `<div class="desc">${it.description_uz}</div>` : ''}
+        <div class="row-bottom">
+          <div>
+            ${it.old_price ? `<span class="old-price">${fmt(it.old_price)}</span>`:''}
+            <span class="price">${fmt(it.price)} so'm</span>
+          </div>
+          <div id="ctrl-${it.id}"></div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+    renderControl(it, qty);
+  });
+}
+
+function renderControl(it, qty){
+  const el = document.getElementById(`ctrl-${it.id}`);
+  if(!el) return;
+  if(qty > 0){
+    el.innerHTML = `<div class="stepper">
+        <button onclick="changeQty('${it.id}', -1)">−</button>
+        <span>${qty}</span>
+        <button onclick="changeQty('${it.id}', 1)">+</button>
+      </div>`;
+  } else {
+    el.innerHTML = `<button class="add-btn" onclick="changeQty('${it.id}', 1)">+</button>`;
+  }
+}
+
+function findItem(id){
+  for(const catKey in MENU){
+    const found = MENU[catKey].items.find(i=>i.id===id);
+    if(found) return found;
+  }
+}
+
+function changeQty(id, delta){
+  const item = findItem(id);
+  if(!cart[id]) cart[id] = {name:item.name_uz, price:item.price, qty:0, image:item.image};
+  cart[id].qty += delta;
+  if(cart[id].qty <= 0) delete cart[id];
+  renderItems();
+  updateCartBar();
+}
+
+function cartTotals(){
+  let count=0, subtotal=0;
+  Object.values(cart).forEach(c=>{ count+=c.qty; subtotal += c.price*c.qty; });
+  const delivery = (subtotal>0 && subtotal < FREE_DELIVERY_THRESHOLD) ? DELIVERY_FEE : 0;
+  return {count, subtotal, delivery, total: subtotal+delivery};
+}
+
+function updateCartBar(){
+  const {count, total} = cartTotals();
+  const bar = document.getElementById('cartBar');
+  if(count===0){ bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  document.getElementById('cartCount').textContent = `${count} ta mahsulot`;
+  document.getElementById('cartTotal').textContent = `${fmt(total)} so'm`;
+}
+
+document.getElementById('cartBar').onclick = openCart;
+
+function openCart(){
+  const {subtotal, delivery, total} = cartTotals();
+  const root = document.getElementById('drawerRoot');
+  const rows = Object.entries(cart).map(([id,c])=>`
+    <div class="cart-row">
+      <img src="${c.image}">
+      <div class="meta">
+        <div class="n">${c.name}</div>
+        <div class="p">${fmt(c.price)} so'm</div>
+      </div>
+      <div class="stepper">
+        <button onclick="changeQty('${id}', -1); openCart();">−</button>
+        <span>${c.qty}</span>
+        <button onclick="changeQty('${id}', 1); openCart();">+</button>
+      </div>
+    </div>`).join('');
+
+  root.innerHTML = `
+    <div class="overlay" onclick="closeCart()"></div>
+    <div class="drawer">
+      <div class="drawer-head"><h3>Savatcha</h3><span class="close" onclick="closeCart()">✕</span></div>
+      <div class="cart-list">${rows || '<div class="empty">Savatcha bo\'sh</div>'}</div>
+      ${rows ? `
+      <div class="summary">
+        <div class="line"><span>Mahsulotlar</span><span>${fmt(subtotal)} so'm</span></div>
+        <div class="line"><span>Yetkazib berish</span><span>${delivery===0 ? 'BEPUL' : fmt(delivery)+" so'm"}</span></div>
+        ${delivery>0 ? `<div class="free-note">🚚 ${fmt(FREE_DELIVERY_THRESHOLD)} so'm dan — yetkazib berish BEPUL</div>` : ''}
+        <div class="total"><span>Jami</span><span>${fmt(total)} so'm</span></div>
+      </div>
+      <button class="checkout-btn" onclick="submitOrder()">Buyurtma berish</button>
+      ` : ''}
+    </div>`;
+}
+
+function closeCart(){
+  document.getElementById('drawerRoot').innerHTML = '';
+}
+
+function submitOrder(){
+  const {subtotal, delivery, total} = cartTotals();
+  const items = Object.values(cart).map(c=>({name:c.name, price:c.price, qty:c.qty}));
+  const payload = { items, subtotal, delivery, total };
+
+  if(tg){
+    tg.sendData(JSON.stringify(payload));
+    tg.close();
+  } else {
+    alert('Buyurtma: ' + JSON.stringify(payload, null, 2));
+  }
+}
+
+async function init(){
+  const res = await fetch('menu.json');
+  const data = await res.json();
+  MENU = data.categories;
+  DELIVERY_FEE = data.delivery_fee;
+  FREE_DELIVERY_THRESHOLD = data.free_delivery_threshold;
+  activeCat = Object.keys(MENU)[0];
+  renderTabs();
+  renderItems();
+  updateCartBar();
+}
+init();
+</script>
+</body>
+</html>
