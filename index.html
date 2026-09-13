@@ -100,6 +100,10 @@
     padding:12px 14px; font-size:14px; font-family:inherit; resize:none;
   }
   .checkout-form input:focus, .checkout-form textarea:focus{outline:none; border-color:var(--accent);}
+  .done-btn{
+    background:#2a2a2a; color:var(--muted); border:1px solid #3a3a3a; border-radius:10px;
+    padding:10px; font-size:13px; cursor:pointer; margin-top:-2px;
+  }
 </style>
 </head>
 <body>
@@ -250,18 +254,57 @@ function openCart(){
         <div class="total"><span>Jami</span><span>${fmt(total)} so'm</span></div>
       </div>
       <div class="checkout-form">
-        <input id="custName" type="text" placeholder="Ismingiz *" value="${checkoutInfo.name}">
-        <input id="custPhone" type="tel" placeholder="Telefon raqamingiz * (+998...)" value="${checkoutInfo.phone}">
-        <textarea id="custAddress" placeholder="Yetkazib berish manzili * (ko'cha, uy, mo'ljal)" rows="2">${checkoutInfo.address}</textarea>
-        <textarea id="custComment" placeholder="Izoh (ixtiyoriy)" rows="2">${checkoutInfo.comment}</textarea>
+        <input id="custName" type="text" placeholder="Ismingiz *" value="${checkoutInfo.name}" enterkeyhint="next">
+        <input id="custPhone" type="tel" placeholder="Telefon raqamingiz * (+998...)" value="${checkoutInfo.phone}" enterkeyhint="next">
+        <textarea id="custAddress" placeholder="Yetkazib berish manzili * (ko'cha, uy, mo'ljal)" rows="2" enterkeyhint="next">${checkoutInfo.address}</textarea>
+        <textarea id="custComment" placeholder="Izoh (ixtiyoriy)" rows="2" enterkeyhint="done">${checkoutInfo.comment}</textarea>
+        <button type="button" class="done-btn" onclick="dismissKeyboard()">⌨️ Klaviaturani yopish</button>
       </div>
       <button class="checkout-btn" onclick="submitOrder()">Buyurtma berish</button>
       ` : ''}
     </div>`;
+
+  attachEnterNavigation();
 }
 
 function closeCart(){
   document.getElementById('drawerRoot').innerHTML = '';
+}
+
+function dismissKeyboard(){
+  if(document.activeElement && document.activeElement.blur){
+    document.activeElement.blur();
+  }
+}
+
+function attachEnterNavigation(){
+  const order = ['custName', 'custPhone', 'custAddress', 'custComment'];
+  order.forEach((id, idx) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' && el.tagName !== 'TEXTAREA'){
+        e.preventDefault();
+        const next = document.getElementById(order[idx + 1]);
+        if(next) next.focus(); else el.blur();
+      }
+    });
+  });
+}
+
+// iOS'da klaviatura ochilganda ekran balandligi o'zgaradi — shu holatda
+// savatcha oynasini klaviatura yopmaydigan balandlikka moslashtiramiz.
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', () => {
+    const drawer = document.querySelector('.drawer');
+    if(!drawer) return;
+    const vh = window.visualViewport.height;
+    drawer.style.maxHeight = vh * 0.92 + 'px';
+    const active = document.activeElement;
+    if(active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')){
+      setTimeout(() => active.scrollIntoView({block:'center', behavior:'smooth'}), 100);
+    }
+  });
 }
 
 let checkoutInfo = { name: '', phone: '', address: '', comment: '' };
