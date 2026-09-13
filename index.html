@@ -94,6 +94,12 @@
     padding:16px; font-size:16px; font-weight:800; cursor:pointer;
   }
   .empty{padding:30px 16px; text-align:center; color:var(--muted);}
+  .checkout-form{padding:6px 16px 0; display:flex; flex-direction:column; gap:10px;}
+  .checkout-form input, .checkout-form textarea{
+    background:#1c1c1c; border:1px solid #333; border-radius:12px; color:var(--text);
+    padding:12px 14px; font-size:14px; font-family:inherit; resize:none;
+  }
+  .checkout-form input:focus, .checkout-form textarea:focus{outline:none; border-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -243,6 +249,12 @@ function openCart(){
         ${delivery>0 ? `<div class="free-note">🚚 ${fmt(FREE_DELIVERY_THRESHOLD)} so'm dan — yetkazib berish BEPUL</div>` : ''}
         <div class="total"><span>Jami</span><span>${fmt(total)} so'm</span></div>
       </div>
+      <div class="checkout-form">
+        <input id="custName" type="text" placeholder="Ismingiz *" value="${checkoutInfo.name}">
+        <input id="custPhone" type="tel" placeholder="Telefon raqamingiz * (+998...)" value="${checkoutInfo.phone}">
+        <textarea id="custAddress" placeholder="Yetkazib berish manzili * (ko'cha, uy, mo'ljal)" rows="2">${checkoutInfo.address}</textarea>
+        <textarea id="custComment" placeholder="Izoh (ixtiyoriy)" rows="2">${checkoutInfo.comment}</textarea>
+      </div>
       <button class="checkout-btn" onclick="submitOrder()">Buyurtma berish</button>
       ` : ''}
     </div>`;
@@ -252,10 +264,24 @@ function closeCart(){
   document.getElementById('drawerRoot').innerHTML = '';
 }
 
+let checkoutInfo = { name: '', phone: '', address: '', comment: '' };
+
 function submitOrder(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+  const comment = document.getElementById('custComment').value.trim();
+
+  checkoutInfo = { name, phone, address, comment };
+
+  if(!name || !phone || !address){
+    alert("Iltimos, ism, telefon va manzilni to'ldiring — bu kuryer va oshxona uchun zarur.");
+    return;
+  }
+
   const {subtotal, delivery, total} = cartTotals();
   const items = Object.values(cart).map(c=>({name:c.name, price:c.price, qty:c.qty}));
-  const payload = { items, subtotal, delivery, total };
+  const payload = { items, subtotal, delivery, total, name, phone, address, comment };
 
   if(tg){
     tg.sendData(JSON.stringify(payload));
