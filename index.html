@@ -94,16 +94,7 @@
     padding:16px; font-size:16px; font-weight:800; cursor:pointer;
   }
   .empty{padding:30px 16px; text-align:center; color:var(--muted);}
-  .checkout-form{padding:6px 16px 0; display:flex; flex-direction:column; gap:10px;}
-  .checkout-form input, .checkout-form textarea{
-    background:#1c1c1c; border:1px solid #333; border-radius:12px; color:var(--text);
-    padding:12px 14px; font-size:14px; font-family:inherit; resize:none;
-  }
-  .checkout-form input:focus, .checkout-form textarea:focus{outline:none; border-color:var(--accent);}
-  .done-btn{
-    background:#2a2a2a; color:var(--muted); border:1px solid #3a3a3a; border-radius:10px;
-    padding:10px; font-size:13px; cursor:pointer; margin-top:-2px;
-  }
+  .note{padding:6px 16px 0; font-size:12.5px; color:var(--muted); text-align:center;}
 </style>
 </head>
 <body>
@@ -253,78 +244,20 @@ function openCart(){
         ${delivery>0 ? `<div class="free-note">🚚 ${fmt(FREE_DELIVERY_THRESHOLD)} so'm dan — yetkazib berish BEPUL</div>` : ''}
         <div class="total"><span>Jami</span><span>${fmt(total)} so'm</span></div>
       </div>
-      <div class="checkout-form">
-        <input id="custName" type="text" placeholder="Ismingiz *" value="${checkoutInfo.name}" enterkeyhint="next">
-        <input id="custPhone" type="tel" placeholder="Telefon raqamingiz * (+998...)" value="${checkoutInfo.phone}" enterkeyhint="next">
-        <textarea id="custAddress" placeholder="Yetkazib berish manzili * (ko'cha, uy, mo'ljal)" rows="2" enterkeyhint="next">${checkoutInfo.address}</textarea>
-        <textarea id="custComment" placeholder="Izoh (ixtiyoriy)" rows="2" enterkeyhint="done">${checkoutInfo.comment}</textarea>
-        <button type="button" class="done-btn" onclick="dismissKeyboard()">⌨️ Klaviaturani yopish</button>
-      </div>
+      <div class="note">Ism, telefon va manzilni keyingi qadamda botda yozasiz 👇</div>
       <button class="checkout-btn" onclick="submitOrder()">Buyurtma berish</button>
       ` : ''}
     </div>`;
-
-  attachEnterNavigation();
 }
 
 function closeCart(){
   document.getElementById('drawerRoot').innerHTML = '';
 }
 
-function dismissKeyboard(){
-  if(document.activeElement && document.activeElement.blur){
-    document.activeElement.blur();
-  }
-}
-
-function attachEnterNavigation(){
-  const order = ['custName', 'custPhone', 'custAddress', 'custComment'];
-  order.forEach((id, idx) => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter' && el.tagName !== 'TEXTAREA'){
-        e.preventDefault();
-        const next = document.getElementById(order[idx + 1]);
-        if(next) next.focus(); else el.blur();
-      }
-    });
-  });
-}
-
-// iOS'da klaviatura ochilganda ekran balandligi o'zgaradi — shu holatda
-// savatcha oynasini klaviatura yopmaydigan balandlikka moslashtiramiz.
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', () => {
-    const drawer = document.querySelector('.drawer');
-    if(!drawer) return;
-    const vh = window.visualViewport.height;
-    drawer.style.maxHeight = vh * 0.92 + 'px';
-    const active = document.activeElement;
-    if(active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')){
-      setTimeout(() => active.scrollIntoView({block:'center', behavior:'smooth'}), 100);
-    }
-  });
-}
-
-let checkoutInfo = { name: '', phone: '', address: '', comment: '' };
-
 function submitOrder(){
-  const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-  const address = document.getElementById('custAddress').value.trim();
-  const comment = document.getElementById('custComment').value.trim();
-
-  checkoutInfo = { name, phone, address, comment };
-
-  if(!name || !phone || !address){
-    alert("Iltimos, ism, telefon va manzilni to'ldiring — bu kuryer va oshxona uchun zarur.");
-    return;
-  }
-
   const {subtotal, delivery, total} = cartTotals();
   const items = Object.values(cart).map(c=>({name:c.name, price:c.price, qty:c.qty}));
-  const payload = { items, subtotal, delivery, total, name, phone, address, comment };
+  const payload = { items, subtotal, delivery, total };
 
   if(tg){
     tg.sendData(JSON.stringify(payload));
