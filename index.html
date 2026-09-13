@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Lazzatli</title>
+<title>Bereke</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root{
     --bg: #121212;
     --card: #1c1c1c;
-    --accent: #ff5a1f;
+    --accent: #e8452c;
     --accent-2: #6fbf3c;
     --text: #f4f4f4;
     --muted: #9a9a9a;
@@ -21,45 +21,41 @@
   }
   header{
     position:sticky; top:0; z-index:10; background:var(--bg);
-    padding:12px 14px 6px; border-bottom:1px solid #262626;
+    padding:14px 14px 10px; border-bottom:1px solid #262626;
   }
-  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:20px; margin-bottom:10px;}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:20px; margin-bottom:2px;}
   .brand .logo{
     background:var(--accent); color:#fff; padding:4px 10px; border-radius:14px; font-size:16px;
   }
-  .tabs{display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; scrollbar-width:none;}
-  .tabs::-webkit-scrollbar{display:none;}
-  .tab{
-    flex:0 0 auto; padding:9px 16px; border-radius:20px; background:#262626; color:var(--muted);
-    font-size:14px; font-weight:600; white-space:nowrap; cursor:pointer; border:none;
-  }
-  .tab.active{background:var(--accent); color:#fff;}
+  .date-sub{font-size:13px; color:var(--muted); margin-top:2px;}
 
   .promo{
-    margin:12px 14px 4px; padding:18px; border-radius:18px;
-    background:linear-gradient(135deg,#ff7a3d,#ff4d1f); text-align:center; font-weight:800; font-size:18px;
+    margin:12px 14px 4px; padding:16px; border-radius:16px;
+    background:linear-gradient(135deg,#f0603f,#c62f1a); text-align:center; font-weight:800; font-size:16px;
   }
 
   main{padding:6px 14px 14px;}
-  h2.section{font-size:20px; margin:18px 2px 10px;}
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  h2.section{font-size:19px; margin:16px 2px 10px;}
+
+  .list{display:flex; flex-direction:column; gap:14px;}
   .item{
-    background:var(--card); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;
+    background:var(--card); border-radius:16px; overflow:hidden; display:flex;
   }
-  .item img{width:100%; aspect-ratio:1/1; object-fit:cover; background:#333;}
-  .item .info{padding:10px 10px 12px; display:flex; flex-direction:column; gap:8px; flex:1;}
-  .item .name{font-size:14px; font-weight:700; line-height:1.25; min-height:36px;}
-  .item .desc{font-size:11.5px; color:var(--muted);}
-  .row-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:auto;}
-  .price{font-weight:800; font-size:15px;}
-  .old-price{font-size:12px; color:var(--muted); text-decoration:line-through; margin-right:4px;}
+  .item img{width:120px; min-width:120px; height:120px; object-fit:cover; background:#333;}
+  .item .info{padding:12px; display:flex; flex-direction:column; gap:6px; flex:1; min-width:0;}
+  .item .name{font-size:15px; font-weight:700; line-height:1.25;}
+  .item .desc{font-size:12px; color:var(--muted); line-height:1.35;}
+  .row-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:4px;}
+  .price{font-weight:800; font-size:16px;}
   .add-btn{
-    background:var(--accent); color:#fff; border:none; width:32px; height:32px; border-radius:50%;
-    font-size:18px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    background:var(--accent); color:#fff; border:none; width:34px; height:34px; border-radius:50%;
+    font-size:19px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
   }
-  .stepper{display:flex; align-items:center; gap:8px; background:var(--accent); border-radius:20px; padding:4px 8px;}
-  .stepper button{background:none; border:none; color:#fff; font-size:16px; font-weight:800; width:22px; cursor:pointer;}
+  .stepper{display:flex; align-items:center; gap:10px; background:var(--accent); border-radius:20px; padding:5px 10px; flex-shrink:0;}
+  .stepper button{background:none; border:none; color:#fff; font-size:17px; font-weight:800; width:20px; cursor:pointer;}
   .stepper span{color:#fff; font-weight:700; min-width:14px; text-align:center;}
+
+  .empty-menu{padding:40px 16px; text-align:center; color:var(--muted); font-size:14px;}
 
   .cart-bar{
     position:fixed; left:14px; right:14px; bottom:14px; background:var(--accent);
@@ -69,9 +65,7 @@
   .hidden{display:none !important;}
 
   /* Cart drawer */
-  .overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:20;
-  }
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:20;}
   .drawer{
     position:fixed; left:0; right:0; bottom:0; z-index:21; background:var(--bg);
     border-radius:20px 20px 0 0; max-height:85vh; display:flex; flex-direction:column;
@@ -100,11 +94,11 @@
 <body>
 
 <header>
-  <div class="brand"><span class="logo">lazzatli</span> Lazzatli</div>
-  <div class="tabs" id="tabs"></div>
+  <div class="brand"><span class="logo">bereke</span> Bereke</div>
+  <div class="date-sub" id="dateSub">Kunlik menyu</div>
 </header>
 
-<div class="promo">Onam tayyorlagandek mazali taomlar 😋</div>
+<div class="promo">Onam tayyorlagandek mazali, issiq taomlar 😋</div>
 
 <main id="main"></main>
 
@@ -116,7 +110,7 @@
 <div id="drawerRoot"></div>
 
 <script>
-let MENU = {};
+let DISHES = [];
 let DELIVERY_FEE = 15000;
 let FREE_DELIVERY_THRESHOLD = 200000;
 
@@ -124,76 +118,87 @@ const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.expand(); tg.ready(); }
 
 let cart = {}; // id -> {name, price, qty, image}
-let activeCat = null;
 
 function fmt(n){ return n.toLocaleString('ru-RU').replace(/,/g,' '); }
 
-function renderTabs(){
-  const tabs = document.getElementById('tabs');
-  tabs.innerHTML = '';
-  Object.keys(MENU).forEach(catKey=>{
-    const b = document.createElement('button');
-    b.className = 'tab' + (catKey===activeCat ? ' active':'');
-    b.textContent = MENU[catKey].name_uz;
-    b.onclick = ()=>{ activeCat = catKey; renderTabs(); renderItems(); };
-    tabs.appendChild(b);
-  });
-}
+// Bot serverida ishlayotgan "jonli" menyu manzili. Railway'da domain
+// yaratgach, shu yerga o'sha manzil + /menu.json ni yozing. Bo'sh qolsa,
+// yoki ishlamasa, pastdagi zaxira (static) menu.json fayli ishlatiladi.
+const LIVE_MENU_API = "https://worker-production-0234.up.railway.app/menu.json";
 
-function renderItems(){
+async function init(){
+  let data = null;
+  if(LIVE_MENU_API){
+    try{
+      const res = await fetch(LIVE_MENU_API, {cache: 'no-store'});
+      if(res.ok) data = await res.json();
+    }catch(e){ /* jonli manzil ishlamasa, pastga o'tamiz */ }
+  }
+  if(!data){
+    const res = await fetch('menu.json', {cache: 'no-store'});
+    data = await res.json();
+  }
+  DISHES = data.taomlar || [];
+  DELIVERY_FEE = data.yetkazib_berish;
+  FREE_DELIVERY_THRESHOLD = data.bepul_yetkazib_berish_dan;
+  document.getElementById('dateSub').textContent = data.sana || 'Kunlik menyu';
+  renderMenu();
+  updateCartBar();
+}
+init();
+
+function renderMenu(){
   const main = document.getElementById('main');
-  const cat = MENU[activeCat];
-  main.innerHTML = `<h2 class="section">${cat.name_uz} <span style="color:var(--muted); font-size:14px;">${cat.items.length} dona</span></h2><div class="grid" id="grid"></div>`;
-  const grid = document.getElementById('grid');
-  cat.items.forEach(it=>{
-    const qty = cart[it.id] ? cart[it.id].qty : 0;
+  if(DISHES.length === 0){
+    main.innerHTML = `<div class="empty-menu">Bugun uchun menyu hali kiritilmagan. Iltimos, birozdan so'ng qayta tekshiring.</div>`;
+    return;
+  }
+  main.innerHTML = `<h2 class="section">🍽 Bugungi taomlar</h2><div class="list" id="list"></div>`;
+  const list = document.getElementById('list');
+  DISHES.forEach(d=>{
+    const qty = cart[d.id] ? cart[d.id].qty : 0;
     const card = document.createElement('div');
     card.className = 'item';
     card.innerHTML = `
-      <img src="${it.image}" alt="">
+      <img src="${d.rasm}" alt="">
       <div class="info">
-        <div class="name">${it.name_uz}</div>
-        ${it.description_uz ? `<div class="desc">${it.description_uz}</div>` : ''}
+        <div class="name">${d.nomi}</div>
+        ${d.tavsif ? `<div class="desc">${d.tavsif}</div>` : ''}
         <div class="row-bottom">
-          <div>
-            ${it.old_price ? `<span class="old-price">${fmt(it.old_price)}</span>`:''}
-            <span class="price">${fmt(it.price)} so'm</span>
-          </div>
-          <div id="ctrl-${it.id}"></div>
+          <span class="price">${fmt(d.narx)} so'm</span>
+          <div id="ctrl-${d.id}"></div>
         </div>
       </div>`;
-    grid.appendChild(card);
-    renderControl(it, qty);
+    list.appendChild(card);
+    renderControl(d, qty);
   });
 }
 
-function renderControl(it, qty){
-  const el = document.getElementById(`ctrl-${it.id}`);
+function renderControl(d, qty){
+  const el = document.getElementById(`ctrl-${d.id}`);
   if(!el) return;
   if(qty > 0){
     el.innerHTML = `<div class="stepper">
-        <button onclick="changeQty('${it.id}', -1)">−</button>
+        <button onclick="changeQty('${d.id}', -1)">−</button>
         <span>${qty}</span>
-        <button onclick="changeQty('${it.id}', 1)">+</button>
+        <button onclick="changeQty('${d.id}', 1)">+</button>
       </div>`;
   } else {
-    el.innerHTML = `<button class="add-btn" onclick="changeQty('${it.id}', 1)">+</button>`;
+    el.innerHTML = `<button class="add-btn" onclick="changeQty('${d.id}', 1)">+</button>`;
   }
 }
 
-function findItem(id){
-  for(const catKey in MENU){
-    const found = MENU[catKey].items.find(i=>i.id===id);
-    if(found) return found;
-  }
+function findDish(id){
+  return DISHES.find(d => d.id === id);
 }
 
 function changeQty(id, delta){
-  const item = findItem(id);
-  if(!cart[id]) cart[id] = {name:item.name_uz, price:item.price, qty:0, image:item.image};
+  const dish = findDish(id);
+  if(!dish) return;
+  if(!cart[id]) cart[id] = {name:dish.nomi, price:dish.narx, qty:0, image:dish.rasm};
   cart[id].qty += delta;
   if(cart[id].qty <= 0) delete cart[id];
-  renderItems();
+  renderMenu();
   updateCartBar();
 }
 
@@ -266,19 +271,6 @@ function submitOrder(){
     alert('Buyurtma: ' + JSON.stringify(payload, null, 2));
   }
 }
-
-async function init(){
-  const res = await fetch('menu.json');
-  const data = await res.json();
-  MENU = data.categories;
-  DELIVERY_FEE = data.delivery_fee;
-  FREE_DELIVERY_THRESHOLD = data.free_delivery_threshold;
-  activeCat = Object.keys(MENU)[0];
-  renderTabs();
-  renderItems();
-  updateCartBar();
-}
-init();
 </script>
 </body>
 </html>
